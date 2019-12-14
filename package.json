@@ -1,6 +1,6 @@
 {
   "name": "hordes.io",
-  "version": "1.0.0",
+  "version": "0.1",
   "description": "A simple tool for modifying the game hordes.io",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "none atm"
+    "url": "https://github.com/pcnbj/hordes.io.custom.client/"
   },
   "keywords": [
     "none"
   ],
   "author": "Peter Christian Nouvel Buch-Jakobsen",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "fs": "0.0.1-security",
     "iohook": "^0.6.2",
