@@ -10,5 +10,8 @@ npm install
 ```bash
 npm start
 ```
+# Note
+ALL information is stored in the settings.json file in PLAIN TEXT for now including email and passoword
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
