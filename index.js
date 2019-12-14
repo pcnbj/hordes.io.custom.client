@@ -1,6 +1,7 @@
 const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require('iohook');
+const prompt = require('prompt');
 var fs = require("fs");
 var download = function(uri, filename, callback) {
   request.head(uri, function(err, res, body) {
@@ -12,71 +13,20 @@ var download = function(uri, filename, callback) {
   });
 };
 
+//Start prompt
+prompt.start()
+
 //Get settings from settings.json
 const settings = JSON.parse(fs.readFileSync('settings.json'));
 //Read Game Settings
-const gameSettings = settings['Game Settings'];
+let gameSettings = settings['Game Settings'];
 //Read Account Settings
-const accountSettings = settings['Account Settings'];
+let accountSettings = settings['Account Settings'];
 //Read Client Settings
-const clientSettings = settings['Client Settings']
-
-//Map keynames to keycodes NOTE: Add more keys
-const keycodes = {
-  Numpad1: 3663,
-  Numpad2: 57424,
-  Numpad3: 3665,
-  Numpad4: 57419,
-  Numpad5: 57420,
-  Numpad6: 57421,
-  Numpad7: 3665,
-  Numpad8: 57416,
-  Numpad9: 3657
-}
-
-let browser;
-let page;
-let rotationOn = false;
-
-//Set Auto Rotation shortcut
-const rotationShortcut = [keycodes['Numpad1']];
-
-//Console log any key pressed, used to get keycodes
-/* ioHook.on('keydown', event => {
-  console.log(event);
-}); */
-
-//Exit Shortcut
-const exitClient = ioHook.registerShortcut([keycodes['Numpad9']], (keys) => {
-  exitHandler();
-});
-
-//Save Settings shortcut
-const saveSettings = ioHook.registerShortcut([keycodes['Numpad3']], async(keys) => {
-  console.log('Saving Settings');
-  const localStorageData = await page.evaluate(() =>  Object.assign({}, window.localStorage));
-  console.log(localStorageData);
-  const settings = JSON.parse(fs.readFileSync('settings.json'));
-  settings['Game Settings'] = localStorageData;
-  fs.writeFileSync('settings.json', JSON.stringify(settings));
-  console.log('Settings Saved');
-});
-
-//Start Auto Rotation
-const autoRotation = ioHook.registerShortcut(rotationShortcut, (keys) => {
-  rotationOn = !rotationOn;
-  if(rotationOn) {
-    console.log('Auto Rotation Activated');
-  } else {
-    console.log('Auto Rotation Deactivated');
-  }
-});
-
-//Start ioHook
-ioHook.start();
+let clientSettings = settings['Client Settings'];
 
 //Puppeteer start
-(async () => {
+const clientRun = (async () => {
   try {
     browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
     setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
@@ -151,7 +101,79 @@ ioHook.start();
   } catch (e) {
     console.log(e);
   }
-})();
+});
+
+if(accountSettings.email === '' || accountSettings.password === '') {
+  prompt.get(['email', 'password'], (err, result) => {
+    if(err) {
+      console.log('Error please try again');
+    }
+    settings['Account Settings'] = {
+      email: result.email,
+      password: result.password
+    }
+    fs.writeFileSync('settings.json', JSON.stringify(settings));
+    accountSettings = settings['Account Settings'];
+    console.log('Account information received and saved');
+    clientRun();
+  })
+} else {
+  clientRun();
+}
+
+//Map keynames to keycodes NOTE: Add more keys
+const keycodes = {
+  Numpad1: 3663,
+  Numpad2: 57424,
+  Numpad3: 3665,
+  Numpad4: 57419,
+  Numpad5: 57420,
+  Numpad6: 57421,
+  Numpad7: 3665,
+  Numpad8: 57416,
+  Numpad9: 3657
+}
+
+let browser;
+let page;
+let rotationOn = false;
+
+//Set Auto Rotation shortcut
+const rotationShortcut = [keycodes['Numpad1']];
+
+//Console log any key pressed, used to get keycodes
+/* ioHook.on('keydown', event => {
+  console.log(event);
+}); */
+
+//Exit Shortcut
+const exitClient = ioHook.registerShortcut([keycodes['Numpad9']], (keys) => {
+  exitHandler();
+});
+
+//Save Settings shortcut
+const saveSettings = ioHook.registerShortcut([keycodes['Numpad3']], async(keys) => {
+  console.log('Saving Settings');
+  const localStorageData = await page.evaluate(() =>  Object.assign({}, window.localStorage));
+  console.log(localStorageData);
+  const settings = JSON.parse(fs.readFileSync('settings.json'));
+  settings['Game Settings'] = localStorageData;
+  fs.writeFileSync('settings.json', JSON.stringify(settings));
+  console.log('Settings Saved');
+});
+
+//Start Auto Rotation
+const autoRotation = ioHook.registerShortcut(rotationShortcut, (keys) => {
+  rotationOn = !rotationOn;
+  if(rotationOn) {
+    console.log('Auto Rotation Activated');
+  } else {
+    console.log('Auto Rotation Deactivated');
+  }
+});
+
+//Start ioHook
+ioHook.start();
 
 //Exit handler
 const exitHandler = async() => {
