@@ -25,16 +25,23 @@ let accountSettings = settings['Account Settings'];
 //Read Client Settings
 let clientSettings = settings['Client Settings'];
 
+const characterIndex = Number(process.argv.slice(2));
+
+console.log(characterIndex);
+
 //Puppeteer start
 const clientRun = (async () => {
   try {
+    //Launch Puppeteer
     browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
+    //Set game settings
     setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
+    //Define the page into a variable
     const pages = await browser.pages();
     page = pages[0];
-    //await page.setViewport({ width: 1920, height: 1040 });
+    //Go to the horders.io login page
     await page.goto("https://hordes.io/login");
-    //Wait for the play button to appear
+    //Wait for the email field to appear
     await page.waitForSelector("#identifierId");
     console.log("Page Loaded");
     //Fill in email form
@@ -55,12 +62,12 @@ const clientRun = (async () => {
     //Select Character
     //Wait for the character to appear
     await page.waitForSelector(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(2)"
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(" + characterIndex + ")"
     );
     console.log("Character Found");
     //Click the character
     await page.click(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(2)"
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(" + characterIndex + ")"
     );
     //Wait for the enter world button
     await page.waitForSelector(
