@@ -1,6 +1,7 @@
 const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require('iohook');
+const prompt = require('prompt');
 var fs = require("fs");
 var download = function(uri, filename, callback) {
   request.head(uri, function(err, res, body) {
@@ -12,14 +13,149 @@ var download = function(uri, filename, callback) {
   });
 };
 
+let browser;
+let page;
+let rotationOn = false;
+
+//Start prompt
+prompt.start()
+
 //Get settings from settings.json
 const settings = JSON.parse(fs.readFileSync('settings.json'));
 //Read Game Settings
-const gameSettings = settings['Game Settings'];
+let gameSettings = settings['Game Settings'];
 //Read Account Settings
-const accountSettings = settings['Account Settings'];
+let accountSettings = settings['Account Settings'];
 //Read Client Settings
-const clientSettings = settings['Client Settings']
+let clientSettings = settings['Client Settings'];
+
+//Exit handler
+const exitHandler = () => {
+  console.log('Exiting');
+  if(browser) {
+    browser.close();
+  }
+  process.exit(0);
+}
+
+//Get character index parameter if not found set it to 1
+const characterIndex = process.argv.slice(2) || 1;
+
+console.log(characterIndex);
+
+if(!/([1-5])/.test(characterIndex)) {
+  console.log('Error the specified character index is invalid');
+  exitHandler();
+}
+
+console.log('Character ' + characterIndex + ' Selected');
+
+//Puppeteer start
+const clientRun = (async () => {
+  try {
+    //Launch Puppeteer
+    browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
+    //Set game settings
+    setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
+    //Define the page into a variable
+    const pages = await browser.pages();
+    page = pages[0];
+    //Go to the horders.io login page
+    await page.goto("https://hordes.io/login");
+    //Wait for the email field to appear
+    await page.waitForSelector("#identifierId");
+    console.log("Page Loaded");
+    //Fill in email form
+    await page.waitForSelector("#identifierId");
+    console.log("Email Input Found");
+    await page.focus("#identifierId");
+    await page.keyboard.type(accountSettings['email']);
+    await page.keyboard.press("Enter");
+    //Fill in password form
+    await page.waitForSelector(
+      "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input",
+      { visible: true }
+    );
+    console.log("Password Input Found");
+    await page.focus("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input");
+    await page.keyboard.type(accountSettings['password']);
+    await page.keyboard.press("Enter");
+    //Select Character
+    //Wait for the character to appear
+    await page.waitForSelector(
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(" + characterIndex + ")"
+    );
+    console.log("Character Found");
+    //Click the character
+    await page.click(
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(" + characterIndex + ")"
+    );
+    //Wait for the enter world button
+    await page.waitForSelector(
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.btn.playbtn.primary.svelte-15hmaii"
+    );
+    //Click the enter world button
+    await page.click(
+      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.btn.playbtn.primary.svelte-15hmaii"
+    );
+    //Wait for the character ui to appear
+    await page.waitForSelector(
+      "body > div.l-ui.layout.svelte-16x821t > div.container.combat.svelte-16x821t > div.uiscaled > div"
+    );
+    //Inject new styles
+    await page.addStyleTag({ path: "style.css" });
+    await page.waitForSelector(
+      "#ufplayer > div.panel-black.bars.targetable.svelte-1rrmvqb > div:nth-child(1) > div.progressBar.bghealth.svelte-kl29tr"
+    );
+    //Inform player that the game has loaded
+    console.log("Actionbar Found");
+
+    //Change UI
+    await page.evaluate(() => {
+        //Add 'EXP: ' spans before the exp displays 
+        const exp = document.createElement('span');
+        exp.innerHTML = 'EXP: ';
+        exp.className = 'exp-label-1'
+        document.querySelector("#expbar > div > div.progressBar.bgexp.svelte-kl29tr").appendChild(exp);
+        const exp2 = document.createElement('span');
+        exp2.innerHTML = 'EXP: ';
+        exp2.className = 'exp-label-2'
+        document.querySelector("#expbar > div > div.progressBar.bgexp.svelte-kl29tr").appendChild(exp2);
+    })
+
+    //Inform player that game is ready
+    console.log('Everything loaded, Enjoy');
+    console.log(`Key shortcuts: 
+      Numpad1: Auto Rotation,
+      Numpad3: Save Settings,
+      Numpad9: Exit
+    `);
+
+    //Setinterval with rotation
+    setInterval(() => rotation(page), 1000);
+    
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+if(accountSettings.email === '' || accountSettings.password === '') {
+  prompt.get(['email', 'password'], (err, result) => {
+    if(err) {
+      console.log('Error please try again');
+    }
+    settings['Account Settings'] = {
+      email: result.email,
+      password: result.password
+    }
+    fs.writeFileSync('settings.json', JSON.stringify(settings));
+    accountSettings = settings['Account Settings'];
+    console.log('Account information received and saved');
+    clientRun();
+  })
+} else {
+  clientRun();
+}
 
 //Map keynames to keycodes NOTE: Add more keys
 const keycodes = {
@@ -33,10 +169,6 @@ const keycodes = {
   Numpad8: 57416,
   Numpad9: 3657
 }
-
-let browser;
-let page;
-let rotationOn = false;
 
 //Set Auto Rotation shortcut
 const rotationShortcut = [keycodes['Numpad1']];
@@ -74,91 +206,6 @@ const autoRotation = ioHook.registerShortcut(rotationShortcut, (keys) => {
 
 //Start ioHook
 ioHook.start();
-
-//Puppeteer start
-(async () => {
-  try {
-    browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
-    setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
-    const pages = await browser.pages();
-    page = pages[0];
-    //await page.setViewport({ width: 1920, height: 1040 });
-    await page.goto("https://hordes.io/login");
-    //Wait for the play button to appear
-    await page.waitForSelector("#identifierId");
-    console.log("Page Loaded");
-    //Fill in email form
-    await page.waitForSelector("#identifierId");
-    console.log("Email Input Found");
-    await page.focus("#identifierId");
-    await page.keyboard.type(accountSettings['email']);
-    await page.keyboard.press("Enter");
-    //Fill in password form
-    await page.waitForSelector(
-      "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input",
-      { visible: true }
-    );
-    console.log("Password Input Found");
-    await page.focus("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input");
-    await page.keyboard.type(accountSettings['password']);
-    await page.keyboard.press("Enter");
-    //Select Character
-    //Wait for the character to appear
-    await page.waitForSelector(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(2)"
-    );
-    console.log("Character Found");
-    //Click the character
-    await page.click(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.list.svelte-15hmaii > div:nth-child(2)"
-    );
-    //Wait for the enter world button
-    await page.waitForSelector(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.btn.playbtn.primary.svelte-15hmaii"
-    );
-    //Click the enter world button
-    await page.click(
-      "#hero > div.row.slim.svelte-ocydj6 > div > div > div > div.btn.playbtn.primary.svelte-15hmaii"
-    );
-    //Wait for the character ui to appear
-    await page.waitForSelector(
-      "body > div.l-ui.layout.svelte-16x821t > div.container.combat.svelte-16x821t > div.uiscaled > div"
-    );
-    //Inject new styles
-    await page.addStyleTag({ path: "style.css" });
-    await page.waitForSelector(
-      "#ufplayer > div.panel-black.bars.targetable.svelte-1rrmvqb > div:nth-child(1) > div.progressBar.bghealth.svelte-kl29tr"
-    );
-    //Inform player that the game has loaded
-    console.log("Actionbar Found, Game Loaded");
-
-    //Change UI
-    await page.evaluate(() => {
-        //Add 'EXP: ' spans before the exp displays 
-        const exp = document.createElement('span');
-        exp.innerHTML = 'EXP: ';
-        exp.className = 'exp-label-1'
-        document.querySelector("#expbar > div > div.progressBar.bgexp.svelte-kl29tr").appendChild(exp);
-        const exp2 = document.createElement('span');
-        exp2.innerHTML = 'EXP: ';
-        exp2.className = 'exp-label-2'
-        document.querySelector("#expbar > div > div.progressBar.bgexp.svelte-kl29tr").appendChild(exp2);
-    })
-
-    //Setinterval with rotation
-    setInterval(() => rotation(page), 1000);
-    
-  } catch (e) {
-    console.log(e);
-  }
-})();
-
-//Exit handler
-const exitHandler = async() => {
-  console.log('Exiting');
-  browser.close();
-  process.exit(0);
-}
 
 //Function to set localstorage
 const setDomainLocalStorage = async (browser, url, values) => {
