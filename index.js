@@ -13,6 +13,10 @@ var download = function(uri, filename, callback) {
   });
 };
 
+let browser;
+let page;
+let rotationOn = false;
+
 //Start prompt
 prompt.start()
 
@@ -25,8 +29,24 @@ let accountSettings = settings['Account Settings'];
 //Read Client Settings
 let clientSettings = settings['Client Settings'];
 
+//Exit handler
+const exitHandler = () => {
+  console.log('Exiting');
+  if(browser) {
+    browser.close();
+  }
+  process.exit(0);
+}
+
 //Get character index parameter if not found set it to 1
-const characterIndex = Number(process.argv.slice(2)) || 1;
+const characterIndex = process.argv.slice(2) || 1;
+
+console.log(characterIndex);
+
+if(!/([1-5])/.test(characterIndex)) {
+  console.log('Error the specified character index is invalid');
+  exitHandler();
+}
 
 console.log('Character ' + characterIndex + ' Selected');
 
@@ -150,10 +170,6 @@ const keycodes = {
   Numpad9: 3657
 }
 
-let browser;
-let page;
-let rotationOn = false;
-
 //Set Auto Rotation shortcut
 const rotationShortcut = [keycodes['Numpad1']];
 
@@ -190,13 +206,6 @@ const autoRotation = ioHook.registerShortcut(rotationShortcut, (keys) => {
 
 //Start ioHook
 ioHook.start();
-
-//Exit handler
-const exitHandler = async() => {
-  console.log('Exiting');
-  browser.close();
-  process.exit(0);
-}
 
 //Function to set localstorage
 const setDomainLocalStorage = async (browser, url, values) => {
