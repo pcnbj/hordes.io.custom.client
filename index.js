@@ -25,7 +25,7 @@ let accountSettings = settings['Account Settings'];
 //Read Client Settings
 let clientSettings = settings['Client Settings'];
 
-const characterIndex = Number(process.argv.slice(2));
+const characterIndex = Number(process.argv.slice(2)) | 1;
 
 console.log(characterIndex);
 
