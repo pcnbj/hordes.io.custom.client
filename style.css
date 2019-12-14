@@ -1,0 +1,59 @@
+.bghealth {
+        
+    }
+
+.actionbarcontainer {
+    margin-bottom: 5% !important;
+}
+
+/* EXP Bar xx/xx */
+#expbar > div > div.progressBar.bgexp.svelte-kl29tr > span.left.svelte-kl29tr {
+    position: fixed;
+    top: 50%;
+    font-size: 20px;
+    left: 50px;
+}
+
+/* EXP Bar % */
+#expbar > div > div.progressBar.bgexp.svelte-kl29tr > span.right.svelte-kl29tr {
+    position: fixed;
+    top: 53%;
+    font-size: 20px;
+    left: 50px;
+}
+
+.exp-label-1 {
+    position: fixed;
+    top: 50%;
+    font-size: 20px;
+    left: 5px;
+}
+
+.exp-label-2 {
+    position: fixed;
+    top: 53%;
+    font-size: 20px;
+    left: 5px;
+}
+
+#expbar > div {
+    height: 15px;
+}
+
+body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.container.panel-black.svelte-1961gjh {
+    display: none !important;
+}
+
+body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.l-corner-lr.container.svelte-rhzpkh {
+    width: 30%;
+    height: 30%;
+}
+
+body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.l-corner-lr.container.svelte-rhzpkh > div > div.slot.svelte-1rw636 > div.wrapper.svelte-rhzpkh {
+    width: auto !important;
+}
+
+body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.l-corner-lr.container.svelte-rhzpkh > div > div.titleframe.svelte-1rw636 > img.btn.black.svgicon {
+    width: 20px;
+    margin-right: 5px;
+}
