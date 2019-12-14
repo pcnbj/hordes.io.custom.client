@@ -25,9 +25,10 @@ let accountSettings = settings['Account Settings'];
 //Read Client Settings
 let clientSettings = settings['Client Settings'];
 
-const characterIndex = Number(process.argv.slice(2)) | 1;
+//Get character index parameter if not found set it to 1
+const characterIndex = Number(process.argv.slice(2)) || 1;
 
-console.log(characterIndex);
+console.log('Character ' + characterIndex + ' Selected');
 
 //Puppeteer start
 const clientRun = (async () => {
@@ -87,7 +88,7 @@ const clientRun = (async () => {
       "#ufplayer > div.panel-black.bars.targetable.svelte-1rrmvqb > div:nth-child(1) > div.progressBar.bghealth.svelte-kl29tr"
     );
     //Inform player that the game has loaded
-    console.log("Actionbar Found, Game Loaded");
+    console.log("Actionbar Found");
 
     //Change UI
     await page.evaluate(() => {
@@ -101,6 +102,14 @@ const clientRun = (async () => {
         exp2.className = 'exp-label-2'
         document.querySelector("#expbar > div > div.progressBar.bgexp.svelte-kl29tr").appendChild(exp2);
     })
+
+    //Inform player that game is ready
+    console.log('Everything loaded, Enjoy');
+    console.log(`Key shortcuts: 
+      Numpad1: Auto Rotation,
+      Numpad3: Save Settings,
+      Numpad9: Exit
+    `);
 
     //Setinterval with rotation
     setInterval(() => rotation(page), 1000);
