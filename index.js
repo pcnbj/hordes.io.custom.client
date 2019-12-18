@@ -2,15 +2,6 @@ const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require("iohook");
 var fs = require("fs");
-var download = function(uri, filename, callback) {
-  request.head(uri, function(err, res, body) {
-    console.log("content-type:", res.headers["content-type"]);
-    console.log("content-length:", res.headers["content-length"]);
-    request(uri)
-      .pipe(fs.createWriteStream(filename))
-      .on("close", callback);
-  });
-};
 
 //Get settings from settings.json
 const settings = JSON.parse(fs.readFileSync("settings.json"));
@@ -58,8 +49,6 @@ const exitClient = ioHook.registerShortcut([keycodes["Numpad9"]], keys => {
 
 //Get character index parameter if not found set it to 1
 const characterIndex = process.argv.slice(2) || 1;
-
-console.log(characterIndex);
 
 if (!/([1-5])/.test(characterIndex)) {
   console.log("Error the specified character index is invalid");
@@ -140,10 +129,8 @@ ioHook.start();
     await page.click(".playbtn");
     //Wait for the character ui to appear
     await page.waitForSelector(".actionbarcontainer");
-    //Inject new styles and jquery
+    //Inject new styles
     await page.addStyleTag({ path: "style.css" });
-    await page.addScriptTag({ path: 'inject.js' });
-    await page.addScriptTag({url: 'https://code.jquery.com/jquery-3.2.1.min.js'});
     //Inform player that the game has loaded
     console.log("Actionbar Found, Game Loaded");
 
