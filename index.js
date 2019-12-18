@@ -111,11 +111,6 @@ const autoRotation = ioHook.registerShortcut(rotationShortcut, keys => {
 //Puppeteer start
 const clientRun = (async () => {
   try {
-    browser = await puppeteer.launch({
-      headless: false,
-      args: [`--start-maximized`, "--app=https://hordes.io/"],
-      defaultViewport: null
-    });
     //Launch Puppeteer
     browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
     //Set game settings
