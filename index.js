@@ -242,7 +242,8 @@ const rotation = async page => {
 const sortInv = async page => {
   console.log('Sorting Inv...');
   const items = [];
-  for (let i = 0; i < 17; i++) {
+  const bagSize = await page.evaluate(container => container.childNodes.length, await page.$('.slotcontainer'));
+  for (let i = 0; i < bagSize; i++) {
     const slot = await page.$(`#bag${i} > .icon`);
     if (slot) {
       /* console.log("Slot Exists"); */
