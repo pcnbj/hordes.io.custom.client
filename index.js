@@ -3,6 +3,13 @@ const puppeteer = require("puppeteer");
 const ioHook = require("iohook");
 var fs = require("fs");
 
+let browser;
+let page;
+let rotationOn = false;
+
+//Start prompt
+prompt.start()
+
 //Get settings from settings.json
 const settings = JSON.parse(fs.readFileSync("settings.json"));
 //Read Game Settings
@@ -25,17 +32,17 @@ const keycodes = {
   Numpad9: 3657
 };
 
-let browser;
-let page;
-let rotationOn = false;
-
 //Set Auto Rotation shortcut
 const rotationShortcut = [keycodes["Numpad1"]];
 
-//Console log any key pressed, used to get keycodes
-/* ioHook.on('keydown', event => {
-  console.log(event);
-}); */
+//Exit handler
+const exitHandler = () => {
+  console.log('Exiting');
+  if(browser) {
+    browser.close();
+  }
+  process.exit(0);
+}
 
 //Sort Inventory Shotcut
 const sortInventory = ioHook.registerShortcut([keycodes["Numpad2"]], keys => {
@@ -83,23 +90,24 @@ const autoRotation = ioHook.registerShortcut(rotationShortcut, keys => {
   }
 });
 
-//Start ioHook
-ioHook.start();
-
 //Puppeteer start
-(async () => {
+const clientRun = (async () => {
   try {
     browser = await puppeteer.launch({
       headless: false,
       args: [`--start-maximized`, "--app=https://hordes.io/"],
       defaultViewport: null
     });
-    setDomainLocalStorage(browser, "https://hordes.io/play", gameSettings);
+    //Launch Puppeteer
+    browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
+    //Set game settings
+    setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
+    //Define the page into a variable
     const pages = await browser.pages();
     page = pages[0];
-    //await page.setViewport({ width: 1920, height: 1040 });
+    //Go to the horders.io login page
     await page.goto("https://hordes.io/login");
-    //Wait for the play button to appear
+    //Wait for the email field to appear
     await page.waitForSelector("#identifierId");
     console.log("Page Loaded");
     //Fill in email form
@@ -132,7 +140,7 @@ ioHook.start();
     //Inject new styles
     await page.addStyleTag({ path: "style.css" });
     //Inform player that the game has loaded
-    console.log("Actionbar Found, Game Loaded");
+    console.log("Actionbar Found");
 
     //Change UI
     await page.evaluate(() => {
@@ -147,19 +155,46 @@ ioHook.start();
       document.querySelector("#expbar > div > .progressBar").appendChild(exp2);
     });
 
+    //Inform player that game is ready
+    console.log('Everything loaded, Enjoy');
+    console.log(`Key shortcuts: 
+      Numpad1: Auto Rotation,
+      Numpad3: Save Settings,
+      Numpad9: Exit
+    `);
+
     //Setinterval with rotation
     setInterval(() => rotation(page), 1000);
   } catch (e) {
     console.log(e);
   }
-})();
+});
 
-//Exit handler
-const exitHandler = async () => {
-  console.log("Exiting");
-  browser.close();
-  process.exit(0);
-};
+if(accountSettings.email === '' || accountSettings.password === '') {
+  prompt.get(['email', 'password'], (err, result) => {
+    if(err) {
+      console.log('Error please try again');
+    }
+    settings['Account Settings'] = {
+      email: result.email,
+      password: result.password
+    }
+    fs.writeFileSync('settings.json', JSON.stringify(settings));
+    accountSettings = settings['Account Settings'];
+    console.log('Account information received and saved');
+    clientRun();
+  })
+} else {
+  clientRun();
+}
+
+//Console log any key pressed, used to get keycodes
+/* ioHook.on('keydown', event => {
+  console.log(event);
+}); */
+
+//Start ioHook
+ioHook.start();
 
 //Function to set localstorage
 const setDomainLocalStorage = async (browser, url, values) => {

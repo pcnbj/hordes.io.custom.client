@@ -18,6 +18,7 @@
   "dependencies": {
     "fs": "0.0.1-security",
     "iohook": "^0.6.2",
+    "prompt": "^1.0.0",
     "puppeteer": "^2.0.0",
     "request": "^2.88.0"
   }

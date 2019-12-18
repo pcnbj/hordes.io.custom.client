@@ -75,7 +75,7 @@
     "editorActive": "false",
     "kbUntarget": "\"escape\"",
     "kbCharacter": "\"c\"",
-    "skillbarsettings": "{\"MrSilver\":[{\"id\":1,\"type\":0,\"info\":[],\"hotkey\":\"1\"},{\"id\":3,\"type\":0,\"info\":[],\"hotkey\":\"2\"},{\"id\":2,\"type\":0,\"info\":[],\"hotkey\":\"3\"},{\"id\":33,\"type\":0,\"info\":[],\"hotkey\":\"4\"},{\"id\":100,\"type\":0,\"info\":[0],\"item\":{\"type\":\"misc\",\"tier\":0},\"hotkey\":\"5\"},{\"id\":100,\"type\":0,\"info\":[1],\"item\":{\"type\":\"misc\",\"tier\":1},\"hotkey\":\"6\"},{\"id\":34,\"type\":0,\"info\":[],\"hotkey\":\"7\"},{\"id\":33,\"type\":0,\"info\":[],\"hotkey\":\"8\"},{\"id\":17,\"type\":0,\"info\":[],\"hotkey\":\"9\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"0\"},{\"id\":19,\"type\":0,\"info\":[],\"hotkey\":\"o\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"p\"}],\"Zenn\":[{\"id\":31,\"type\":0,\"info\":[],\"hotkey\":\"1\"},{\"id\":9,\"type\":0,\"info\":[],\"hotkey\":\"2\"},{\"id\":38,\"type\":0,\"info\":[],\"hotkey\":\"3\"},{\"id\":11,\"type\":0,\"info\":[],\"hotkey\":\"4\"},{\"id\":100,\"type\":0,\"info\":[],\"item\":{\"type\":\"misc\",\"tier\":0},\"hotkey\":\"5\"},{\"id\":100,\"type\":0,\"info\":[1],\"item\":{\"type\":\"misc\",\"tier\":1},\"hotkey\":\"6\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"7\"},{\"id\":27,\"type\":0,\"info\":[],\"hotkey\":\"8\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"9\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"0\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"o\"},{\"id\":-1,\"type\":0,\"info\":[],\"hotkey\":\"p\"}]}",
+    "skillbarsettings": "{}",
     "kbBack": "\"s\"",
     "musicVolume": "0",
     "google_experiment_mod22": "366",
@@ -89,8 +89,8 @@
     "kbSkillbar12": "\"p\""
   },
   "Account Settings": {
-    "email": "peterchristian@numerus.dk",
-    "password": "!Clubpenguin6987"
+    "email": "",
+    "password": ""
   },
   "Client Settings": {}
 }
