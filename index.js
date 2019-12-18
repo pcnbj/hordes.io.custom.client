@@ -324,33 +324,13 @@ const sortInv = async page => {
     return b.rarity - a.rarity;
   });
   items.reverse();
-  items.forEach(async (item, i) => {
+  items.forEach(async (item) => {
     try {
-        await page.evaluate(({item, i, items}) => {
+        await page.evaluate(({item, items}) => {
           const slotcontainer = document.querySelector('.slotcontainer');
           prevElement = document.querySelector(`#bag${item.invPos}`);
-          const id = items.length - i - 1;
-          //newElement.id = 'bag' + invPos;
           slotcontainer.insertBefore(prevElement, slotcontainer.childNodes[0]);
-          //prevElement.id = 'bag' + id;
-          //slotcontainer.insertBefore(newElement, document.querySelector(`#bag${invPos}`));
-          /* const $ = window.$;
-          $.ajax({
-            type: "POST",
-            url: "https://hordes.io/api/item/get",
-            data: '{ids: [13385549, 12942987]}',
-            contentType: "text/plain;charset=UTF-8",
-            dataType: "json",
-            success: OnSuccess,
-            cookie: "sid=s%3AhDxor34wWY9BycGqHhBlA1Y6P_vI36nk.RC%2FEcjdcCyKGkaeSGLyox5PC66C22GYz6tcUh2jMnKs; party=; _ga=GA1.2.1727816761.1576450893; _gid=GA1.2.1547889361.1576450893; _gat=1",
-            origin: "https://hordes.io",
-            referer: "https://hordes.io/play",
-          }) */
-          /* slotcontainer.insertBefore(slotcontainer.childNodes[i], prevElement);
-          slotcontainer.removeChild(slotcontainer.childNodes[i + 1]);
-          slotcontainer.insertBefore(slotcontainer.childNodes[invPos], newElement);
-          slotcontainer.removeChild(slotcontainer.childNodes[invPos + 1]); */
-        }, {item, i, items})
+        }, {item, items})
     } catch (err) {
       console.log(err);
     }
