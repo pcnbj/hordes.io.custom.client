@@ -1,6 +1,7 @@
 const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require("iohook");
+const prompt = require("prompt")
 var fs = require("fs");
 
 let browser;
@@ -10,12 +11,29 @@ let rotationOn = false;
 //Start prompt
 prompt.start()
 
+//Check if settings file exists
+if(fs.existsSync('./settings.json')) {
+  console.log('Settings Exist');
+} else {
+  //Create clean settings
+  const settings = JSON.stringify({
+    "Game Settings": {},
+    "Account Settings": {
+      "email": "",
+      "password": ""
+    },
+    "Client Settings": {}
+  });
+  //Write the settings to a new settings.json file
+  fs.writeFileSync('settings.json', settings, 'utf8');
+}
+
 //Get settings from settings.json
 const settings = JSON.parse(fs.readFileSync("settings.json"));
 //Read Game Settings
 const gameSettings = settings["Game Settings"];
 //Read Account Settings
-const accountSettings = settings["Account Settings"];
+let accountSettings = settings["Account Settings"];
 //Read Client Settings
 const clientSettings = settings["Client Settings"];
 
@@ -159,6 +177,7 @@ const clientRun = (async () => {
     console.log('Everything loaded, Enjoy');
     console.log(`Key shortcuts: 
       Numpad1: Auto Rotation,
+      Numpad2: Sort Inventory,
       Numpad3: Save Settings,
       Numpad9: Exit
     `);
