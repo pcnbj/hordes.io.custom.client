@@ -1,6 +1,6 @@
 {
   "name": "hordes.io",
-  "version": "0.1",
+  "version": "1.0.0",
   "description": "A simple tool for modifying the game hordes.io",
   "main": "index.js",
   "scripts": {

@@ -6,8 +6,24 @@
     margin-bottom: 5% !important;
 }
 
+/* Skillbar */
+#skillbar {
+    pointer-events: all;
+    display: grid;
+    grid-gap: 2px;
+    grid-auto-rows: 46px;
+    grid-template-columns: repeat(6, 46px) !important;
+    width: 50%;
+    margin: auto;
+}
+
+/* Actionbar Container */
+.actionbarcontainer {
+    width: 30%;
+}
+
 /* EXP Bar xx/xx */
-#expbar > div > div.progressBar.bgexp.svelte-kl29tr > span.left.svelte-kl29tr {
+#expbar > div > .progressBar > .left {
     position: fixed;
     top: 50%;
     font-size: 20px;
@@ -15,7 +31,7 @@
 }
 
 /* EXP Bar % */
-#expbar > div > div.progressBar.bgexp.svelte-kl29tr > span.right.svelte-kl29tr {
+#expbar > div > .progressBar > .right {
     position: fixed;
     top: 53%;
     font-size: 20px;
@@ -40,7 +56,8 @@
     height: 15px;
 }
 
-body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.container.panel-black.svelte-1961gjh {
+/* Ads */
+body > .layout > div:nth-child(1) > .panel-black {
     display: none !important;
 }
 
