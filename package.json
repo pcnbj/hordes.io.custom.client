@@ -1,0 +1,25 @@
+{
+  "name": "hordes.io",
+  "version": "1.0.0",
+  "description": "A simple tool for modifying the game hordes.io",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pcnbj/hordes.io.custom.client/"
+  },
+  "keywords": [
+    "none"
+  ],
+  "author": "Peter Christian Nouvel Buch-Jakobsen",
+  "license": "MIT",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "iohook": "^0.6.2",
+    "prompt": "^1.0.0",
+    "puppeteer": "^2.0.0",
+    "request": "^2.88.0"
+  }
+}
