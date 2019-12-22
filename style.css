@@ -74,3 +74,10 @@ body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.l-corner-lr.conta
     width: 20px;
     margin-right: 5px;
 }
+
+/* Chat */
+#chat {
+    resize: both;
+    overflow: auto;
+    border: 1px solid lightslategrey;
+}

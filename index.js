@@ -1,7 +1,7 @@
 const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require("iohook");
-const prompt = require("prompt")
+const prompt = require("prompt");
 var fs = require("fs");
 
 let browser;
@@ -9,23 +9,24 @@ let page;
 let rotationOn = false;
 
 //Start prompt
-prompt.start()
+prompt.start();
 
 //Check if settings file exists
-if(fs.existsSync('./settings.json')) {
-  console.log('Settings Exist');
+if (fs.existsSync("./settings.json")) {
+  console.log("Settings Exist");
 } else {
   //Create clean settings
   const settings = JSON.stringify({
     "Game Settings": {},
     "Account Settings": {
-      "email": "",
-      "password": ""
+      email: "",
+      password: ""
     },
-    "Client Settings": {}
+    "Client Settings": {},
+    Cookies: {}
   });
   //Write the settings to a new settings.json file
-  fs.writeFileSync('settings.json', settings, 'utf8');
+  fs.writeFileSync("settings.json", settings, "utf8");
 }
 
 //Get settings from settings.json
@@ -36,6 +37,8 @@ const gameSettings = settings["Game Settings"];
 let accountSettings = settings["Account Settings"];
 //Read Client Settings
 const clientSettings = settings["Client Settings"];
+//Read Cookies
+const cookies = settings["Cookies"];
 
 //Map keynames to keycodes NOTE: Add more keys
 const keycodes = {
@@ -55,32 +58,25 @@ const rotationShortcut = [keycodes["Numpad1"]];
 
 //Exit handler
 const exitHandler = () => {
-  console.log('Exiting');
-  if(browser) {
+  console.log("Exiting");
+  if (browser) {
     browser.close();
   }
   process.exit(0);
-}
+};
 
 //Sort Inventory Shotcut
 const sortInventory = ioHook.registerShortcut([keycodes["Numpad2"]], keys => {
   sortInv(page);
 });
 
-//Exit Shortcut
-const exitClient = ioHook.registerShortcut([keycodes["Numpad9"]], keys => {
-  exitHandler();
-});
-
-//Get character index parameter if not found set it to 1
-const characterIndex = process.argv.slice(2) || 1;
-
-if (!/([1-5])/.test(characterIndex)) {
-  console.log("Error the specified character index is invalid");
-  exitHandler();
-}
-
-console.log("Character " + characterIndex + " Selected");
+//Test Shortcut
+const testShortcut = ioHook.registerShortcut(
+  [keycodes["Numpad4"]],
+  async keys => {
+    
+  }
+);
 
 //Save Settings shortcut
 const saveSettings = ioHook.registerShortcut(
@@ -98,6 +94,21 @@ const saveSettings = ioHook.registerShortcut(
   }
 );
 
+//Exit Shortcut
+const exitClient = ioHook.registerShortcut([keycodes["Numpad9"]], keys => {
+  exitHandler();
+});
+
+//Get character index parameter if not found set it to 1
+const characterIndex = process.argv.slice(2) || 1;
+
+if (!/([1-5])/.test(characterIndex)) {
+  console.log("Error the specified character index is invalid");
+  exitHandler();
+}
+
+console.log("Character " + characterIndex + " Selected");
+
 //Start Auto Rotation
 const autoRotation = ioHook.registerShortcut(rotationShortcut, keys => {
   rotationOn = !rotationOn;
@@ -109,45 +120,99 @@ const autoRotation = ioHook.registerShortcut(rotationShortcut, keys => {
 });
 
 //Puppeteer start
-const clientRun = (async () => {
+const clientRun = async () => {
   try {
     //Launch Puppeteer
-    browser = await puppeteer.launch({ headless: false, args: [`--start-maximized`, '--app=https://hordes.io/'], defaultViewport: null });
+    browser = await puppeteer.launch({
+      headless: false,
+      args: [`--start-maximized`, "--app=https://hordes.io/"],
+      defaultViewport: null
+    });
     //Set game settings
-    setDomainLocalStorage(browser, 'https://hordes.io/play', gameSettings);
+    setDomainLocalStorage(browser, "https://hordes.io/play", gameSettings);
     //Define the page into a variable
     const pages = await browser.pages();
     page = pages[0];
-    //Go to the horders.io login page
-    await page.goto("https://hordes.io/login");
-    //Wait for the email field to appear
-    await page.waitForSelector("#identifierId");
-    console.log("Page Loaded");
-    //Fill in email form
-    await page.waitForSelector("#identifierId");
-    console.log("Email Input Found");
-    await page.focus("#identifierId");
-    await page.keyboard.type(accountSettings["email"]);
-    await page.keyboard.press("Enter");
-    //Fill in password form
-    await page.waitForSelector(
-      "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input",
-      { visible: true }
-    );
-    console.log("Password Input Found");
-    await page.focus("#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input");
-    await page.keyboard.type(accountSettings["password"]);
-    await page.keyboard.press("Enter");
-    //Select Character
-    //Wait for the character to appear
-    await page.waitForSelector(".list > div:nth-child(" + characterIndex + ")");
-    console.log("Character Found");
-    //Click the character
-    await page.click(".list > div:nth-child(" + characterIndex + ")");
-    //Wait for the enter world button
-    await page.waitForSelector(".playbtn");
-    //Click the enter world button
-    await page.click(".playbtn");
+    //Get Cookies
+    if (cookies["Empty"]) {
+      console.log("Cookies empty you have 30 Seconds to login.");
+      //Go to the horders.io login page
+      await page.goto("https://hordes.io/login");
+      //Wait for the characters to appear to save cookies
+      await page
+        .waitForSelector(".list > div:nth-child(" + characterIndex + ")")
+        .then(async () => {
+          await saveCookies().then(async () => {
+            //Select Character
+            //Wait for the character to appear
+            await page.waitForSelector(
+              ".list > div:nth-child(" + characterIndex + ")"
+            );
+            console.log("Character Found");
+            //Click the character
+            await page.click(".list > div:nth-child(" + characterIndex + ")");
+            //Wait for the enter world button
+            await page.waitForSelector(".playbtn");
+            //Click the enter world button
+            await page.click(".playbtn");
+          });
+        })
+        .catch(err => {
+          console.log("Login time exceeded exiting...");
+          console.log(err);
+          exitHandler();
+        });
+    } else {
+      await page.setCookie(...cookies).then(async () => {
+        console.log("Cookies Loaded");
+        const expires = cookies[2].expires;
+        if (new Date(Date.now()) > new Date(expires * 1000)) {
+          console.log("Session expired relog needed");
+        } else {
+          // get total seconds between the times
+          var delta = Math.abs(new Date(expires * 1000) - new Date(Date.now())) / 1000;
+
+          // calculate (and subtract) whole days
+          var days = Math.floor(delta / 86400);
+          delta -= days * 86400;
+
+          // calculate (and subtract) whole hours
+          var hours = Math.floor(delta / 3600) % 24;
+          delta -= hours * 3600;
+
+          // calculate (and subtract) whole minutes
+          var minutes = Math.floor(delta / 60) % 60;
+          delta -= minutes * 60;
+
+          // what's left is seconds
+          var seconds = delta % 60;
+          console.log(
+            "Session expires in: " +
+              days +
+              " Days " +
+              hours + ' Hours ' + minutes + ' Minutes'
+          );
+          //Go to the horders.io login page
+          await page.goto("https://hordes.io").then(async () => {
+            const playBtn = await page.$(".playbtn");
+            //Select Character
+            //Wait for the character to appear
+            await page.waitForSelector(
+              ".list > div:nth-child(" + characterIndex + ")"
+            );
+            console.log("Character Found");
+            //Click the character
+            await page.click(".list > div:nth-child(" + characterIndex + ")");
+            //Wait for the enter world button
+            await page.waitForSelector(".playbtn");
+            //Click the enter world button
+            await page.click(".playbtn");
+          });
+        }
+      });
+    }
+    /* const Cookies = await page.cookies();
+    console.log(JSON.stringify(Cookies)); */
     //Wait for the character ui to appear
     await page.waitForSelector(".actionbarcontainer");
     //Inject new styles
@@ -169,7 +234,7 @@ const clientRun = (async () => {
     });
 
     //Inform player that game is ready
-    console.log('Everything loaded, Enjoy');
+    console.log("Everything loaded, Enjoy");
     console.log(`Key shortcuts: 
       Numpad1: Auto Rotation,
       Numpad2: Sort Inventory,
@@ -182,22 +247,22 @@ const clientRun = (async () => {
   } catch (e) {
     console.log(e);
   }
-});
+};
 
-if(accountSettings.email === '' || accountSettings.password === '') {
-  prompt.get(['email', 'password'], (err, result) => {
-    if(err) {
-      console.log('Error please try again');
+if (accountSettings.email === "" || accountSettings.password === "") {
+  prompt.get(["email", "password"], (err, result) => {
+    if (err) {
+      console.log("Error please try again");
     }
-    settings['Account Settings'] = {
+    settings["Account Settings"] = {
       email: result.email,
       password: result.password
-    }
-    fs.writeFileSync('settings.json', JSON.stringify(settings));
-    accountSettings = settings['Account Settings'];
-    console.log('Account information received and saved');
+    };
+    fs.writeFileSync("settings.json", JSON.stringify(settings));
+    accountSettings = settings["Account Settings"];
+    console.log("Account information received and saved");
     clientRun();
-  })
+  });
 } else {
   clientRun();
 }
@@ -240,9 +305,12 @@ const rotation = async page => {
 
 //Inventory Sort function
 const sortInv = async page => {
-  console.log('Sorting Inv...');
+  console.log("Sorting Inv...");
   const items = [];
-  const bagSize = await page.evaluate(container => container.childNodes.length, await page.$('.slotcontainer'));
+  const bagSize = await page.evaluate(
+    container => container.childNodes.length,
+    await page.$(".slotcontainer")
+  );
   for (let i = 0; i < bagSize; i++) {
     const slot = await page.$(`#bag${i} > .icon`);
     if (slot) {
@@ -374,23 +442,26 @@ const sortInv = async page => {
     return b.rarity - a.rarity;
   });
   items.reverse();
-  items.forEach(async (item) => {
+  items.forEach(async item => {
     try {
-        await page.evaluate(({item, items}) => {
-          const slotcontainer = document.querySelector('.slotcontainer');
+      await page.evaluate(
+        ({ item, items }) => {
+          const slotcontainer = document.querySelector(".slotcontainer");
           prevElement = document.querySelector(`#bag${item.invPos}`);
           slotcontainer.insertBefore(prevElement, slotcontainer.childNodes[0]);
-        }, {item, items})
+        },
+        { item, items }
+      );
     } catch (err) {
       console.log(err);
     }
   });
   await page.evaluate(({}) => {
-    document.querySelector('.slotcontainer').childNodes.forEach((child, i) => {
+    document.querySelector(".slotcontainer").childNodes.forEach((child, i) => {
       child.id = "bag" + i;
-    })
+    });
   }, {});
-  console.log('Sorting Done!');
+  console.log("Sorting Done!");
 };
 
 const getItemReq = async () => {
@@ -438,4 +509,14 @@ const determineRarity = classes => {
       return 3;
     }
   }
+};
+
+const saveCookies = async () => {
+  const settings = JSON.parse(fs.readFileSync("settings.json"));
+  settings["Cookies"] = await page.cookies();
+  fs.writeFileSync("settings.json", JSON.stringify(settings));
+  console.log(
+    "Cookies Saved session expires: " +
+      new Date(settings["Cookies"][2].expires * 1000)
+  );
 };
