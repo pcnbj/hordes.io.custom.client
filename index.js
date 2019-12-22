@@ -18,10 +18,6 @@ if (fs.existsSync("./settings.json")) {
   //Create clean settings
   const settings = JSON.stringify({
     "Game Settings": {},
-    "Account Settings": {
-      email: "",
-      password: ""
-    },
     "Client Settings": {},
     Cookies: {}
   });
@@ -33,8 +29,6 @@ if (fs.existsSync("./settings.json")) {
 const settings = JSON.parse(fs.readFileSync("settings.json"));
 //Read Game Settings
 const gameSettings = settings["Game Settings"];
-//Read Account Settings
-let accountSettings = settings["Account Settings"];
 //Read Client Settings
 const clientSettings = settings["Client Settings"];
 //Read Cookies
@@ -249,23 +243,7 @@ const clientRun = async () => {
   }
 };
 
-if (accountSettings.email === "" || accountSettings.password === "") {
-  prompt.get(["email", "password"], (err, result) => {
-    if (err) {
-      console.log("Error please try again");
-    }
-    settings["Account Settings"] = {
-      email: result.email,
-      password: result.password
-    };
-    fs.writeFileSync("settings.json", JSON.stringify(settings));
-    accountSettings = settings["Account Settings"];
-    console.log("Account information received and saved");
-    clientRun();
-  });
-} else {
-  clientRun();
-}
+clientRun();
 
 //Console log any key pressed, used to get keycodes
 /* ioHook.on('keydown', event => {
