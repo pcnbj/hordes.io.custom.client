@@ -81,3 +81,8 @@ body > div.l-ui.layout.svelte-16x821t > div:nth-child(1) > div.l-corner-lr.conta
     overflow: auto;
     border: 1px solid lightslategrey;
 }
+
+/* All Windows */
+.window {
+    position: relative;
+}

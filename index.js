@@ -4,6 +4,8 @@ const ioHook = require("iohook");
 const prompt = require("prompt");
 var fs = require("fs");
 
+"use strict";
+
 let browser;
 let page;
 let rotationOn = false;
@@ -162,6 +164,23 @@ const clientRun = async () => {
         const expires = cookies[2].expires;
         if (new Date(Date.now()) > new Date(expires * 1000)) {
           console.log("Session expired relog needed");
+          //Go to the horders.io login page
+          await page.goto("https://hordes.io/login").then(async () => {
+            await saveCookies().then(async () => {
+              //Select Character
+              //Wait for the character to appear
+              await page.waitForSelector(
+                ".list > div:nth-child(" + characterIndex + ")"
+              );
+              console.log("Character Found");
+              //Click the character
+              await page.click(".list > div:nth-child(" + characterIndex + ")");
+              //Wait for the enter world button
+              await page.waitForSelector(".playbtn");
+              //Click the enter world button
+              await page.click(".playbtn");
+            });
+          });
         } else {
           // get total seconds between the times
           var delta = Math.abs(new Date(expires * 1000) - new Date(Date.now())) / 1000;
@@ -188,7 +207,6 @@ const clientRun = async () => {
           );
           //Go to the horders.io login page
           await page.goto("https://hordes.io").then(async () => {
-            const playBtn = await page.$(".playbtn");
             //Select Character
             //Wait for the character to appear
             await page.waitForSelector(
@@ -302,101 +320,69 @@ const sortInv = async page => {
             el => el.textContent,
             await page.$(".slotdescription > div > .slottitle")
           );
+          item.name = itemName;
           /* console.log(itemName); */
           const itemType = await page.evaluate(
             el => el.textContent,
             await page.$(".slotdescription > div > .type")
           );
+          item.type = itemType
           /* console.log(itemType); */
           const itemRarity = determineRarity(
             await page.evaluate(el => el.classList, await page.$(`#bag${i}`))
           );
+          item.rarity = itemRarity
           /* console.log(itemRarity); */
           if (itemType.includes("rune")) {
-            const itemReq = await getItemReq();
-            const itemPrice = await getItemPrice();
-            const itemDesc = await getItemDesc();
 
             item = {
-              name: itemName,
-              type: itemType,
-              req: itemReq,
-              price: itemPrice,
-              desc: itemDesc,
-              rarity: itemRarity,
+              ...item,
+              req: await getItemReq(),
+              price: await getItemPrice(),
+              desc: await getItemDesc(),
               invPos: i
             };
           } else if (itemType.includes("book")) {
             /* console.log("Its a book"); */
-            const itemReq = await getItemReq();
-            const itemPrice = await getItemPrice();
-            const itemSecondary = await getItemSecondary();
 
             item = {
-              name: itemName,
-              type: itemType,
-              req: itemReq,
-              price: itemPrice,
-              secondary: itemSecondary,
-              rarity: itemRarity,
+              ...item,
+              req: await getItemReq(),
+              price: await getItemPrice(),
+              secondary: await getItemSecondary(),
               invPos: i
             };
           } else if (itemType.includes("armor")) {
             /* console.log("Its armor"); */
-            const itemGrade = await page.evaluate(
-              el => el.textContent,
-              await page.$(".slotdescription > div > .type")
-            );
-            const itemReq = await getItemReq();
-            const itemPrice = await getItemPrice();
-            const itemDesc = await getItemDesc();
+
             item = {
-              name: itemName,
-              type: itemType,
-              grade: itemGrade,
-              req: itemReq,
-              price: itemPrice,
-              desc: itemDesc,
-              rarity: itemRarity,
+              ...item,
+              grade: await getItemGrade(),
+              req: await getItemReq(),
+              price: await getItemPrice(),
+              desc: await getItemDesc(),
               invPos: i
             };
           } else if (itemType.includes("quiver")) {
             /* console.log("Its a quiver"); */
-            const itemGrade = await page.evaluate(
-              el => el.textContent,
-              await page.$(".slotdescription > div > .type")
-            );
-            const itemReq = await getItemReq();
-            const itemPrice = await getItemPrice();
-            const itemDesc = await getItemDesc();
+
             item = {
-              name: itemName,
-              type: itemType,
-              grade: itemGrade,
-              req: itemReq,
-              price: itemPrice,
-              desc: itemDesc,
-              rarity: itemRarity,
+              ...item,
+              grade: await getItemGrade(),
+              req: await getItemReq(),
+              price: await getItemPrice(),
+              desc: await getItemDesc(),
               invPos: i
             };
           } else {
             /* console.log("Its a misc"); */
-            const itemEffect = await page.evaluate(
-              el => el.textContent,
-              await page.$(".slotdescription > div > span")
-            );
-            const itemReq = await getItemReq();
-            const itemPrice = await getItemPrice();
-            const itemDesc = await getItemDesc();
 
             item = {
-              name: itemName,
-              type: itemType,
-              effect: itemEffect,
-              req: itemReq,
-              price: itemPrice,
-              desc: itemDesc,
-              rarity: itemRarity,
+              ...item,
+              effect: await getItemEffect(),
+              req: await getItemReq(),
+              price: await getItemPrice(),
+              desc: await getItemDesc(),
               invPos: i
             };
           }
@@ -410,6 +396,7 @@ const sortInv = async page => {
       console.log("Slot does not exist");
     } */
   }
+  console.log(items);
   items.sort((a, b) => {
     if (a.rarity === b.rarity) {
       let x = a.name.toLowerCase(),
@@ -441,6 +428,20 @@ const sortInv = async page => {
   }, {});
   console.log("Sorting Done!");
 };
+
+const getItemGrade = async() => {
+  return await page.evaluate(
+    el => el.textContent,
+    await page.$(".slotdescription > div > .type")
+  );
+}
+
+const getItemEffect = async() => {
+  return await page.evaluate(
+    el => el.textContent,
+    await page.$(".slotdescription > div > span")
+  );
+}
 
 const getItemReq = async () => {
   return await page.evaluate(
