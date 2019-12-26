@@ -2,9 +2,10 @@ const request = require("request");
 const puppeteer = require("puppeteer");
 const ioHook = require("iohook");
 const prompt = require("prompt");
+const ownFuncs = require("./ownFunctions");
 var fs = require("fs");
 
-"use strict";
+("use strict");
 
 let browser;
 let page;
@@ -35,6 +36,8 @@ const gameSettings = settings["Game Settings"];
 const clientSettings = settings["Client Settings"];
 //Read Cookies
 const cookies = settings["Cookies"];
+//Get Skills from skills.json
+const skills = JSON.parse(fs.readFileSync("skills.json"));
 
 //Map keynames to keycodes NOTE: Add more keys
 const keycodes = {
@@ -63,14 +66,16 @@ const exitHandler = () => {
 
 //Sort Inventory Shotcut
 const sortInventory = ioHook.registerShortcut([keycodes["Numpad2"]], keys => {
-  sortInv(page);
+  ownFuncs.sortInv(page);
 });
 
 //Test Shortcut
 const testShortcut = ioHook.registerShortcut(
   [keycodes["Numpad4"]],
   async keys => {
-    
+    await getBarInfo().then((result) => {
+      console.log(result);
+    })
   }
 );
 
@@ -78,15 +83,7 @@ const testShortcut = ioHook.registerShortcut(
 const saveSettings = ioHook.registerShortcut(
   [keycodes["Numpad3"]],
   async keys => {
-    console.log("Saving Settings");
-    const localStorageData = await page.evaluate(() =>
-      Object.assign({}, window.localStorage)
-    );
-    console.log(localStorageData);
-    const settings = JSON.parse(fs.readFileSync("settings.json"));
-    settings["Game Settings"] = localStorageData;
-    fs.writeFileSync("settings.json", JSON.stringify(settings));
-    console.log("Settings Saved");
+    ownFuncs.SaveSettings(page, fs);
   }
 );
 
@@ -96,7 +93,7 @@ const exitClient = ioHook.registerShortcut([keycodes["Numpad9"]], keys => {
 });
 
 //Get character index parameter if not found set it to 1
-const characterIndex = process.argv.slice(2) || 1;
+const characterIndex = process.argv.slice(2, 3) || 1;
 
 if (!/([1-5])/.test(characterIndex)) {
   console.log("Error the specified character index is invalid");
@@ -125,7 +122,7 @@ const clientRun = async () => {
       defaultViewport: null
     });
     //Set game settings
-    setDomainLocalStorage(browser, "https://hordes.io/play", gameSettings);
+    ownFuncs.setDomainLocalStorage(browser, "https://hordes.io/play", gameSettings);
     //Define the page into a variable
     const pages = await browser.pages();
     page = pages[0];
@@ -183,7 +180,8 @@ const clientRun = async () => {
           });
         } else {
           // get total seconds between the times
-          var delta = Math.abs(new Date(expires * 1000) - new Date(Date.now())) / 1000;
+          var delta =
+            Math.abs(new Date(expires * 1000) - new Date(Date.now())) / 1000;
 
           // calculate (and subtract) whole days
           var days = Math.floor(delta / 86400);
@@ -203,7 +201,10 @@ const clientRun = async () => {
             "Session expires in: " +
               days +
               " Days " +
-              hours + ' Hours ' + minutes + ' Minutes'
+              hours +
+              " Hours " +
+              minutes +
+              " Minutes"
           );
           //Go to the horders.io login page
           await page.goto("https://hordes.io").then(async () => {
@@ -243,6 +244,16 @@ const clientRun = async () => {
       exp2.innerHTML = "EXP: ";
       exp2.className = "exp-label-2";
       document.querySelector("#expbar > div > .progressBar").appendChild(exp2);
+      //Add Auction House Functionallity
+      document.body.addEventListener('click', (event) => {
+        console.log(event.target.className);
+        if(event.target.className.includes('item')) {
+          console.log(event.target);
+          if(event.shiftKey) {
+            console.log('Shift Cliked An Auction Element');
+          }
+        }
+      })
     });
 
     //Inform player that game is ready
@@ -271,222 +282,11 @@ clientRun();
 //Start ioHook
 ioHook.start();
 
-//Function to set localstorage
-const setDomainLocalStorage = async (browser, url, values) => {
-  const page = await browser.newPage();
-  await page.setRequestInterception(true);
-  page.on("request", r => {
-    r.respond({
-      status: 200,
-      contentType: "text/plain",
-      body: "tweak me."
-    });
-  });
-  await page.goto(url);
-  await page.evaluate(values => {
-    for (const key in values) {
-      localStorage.setItem(key, values[key]);
-    }
-  }, values);
-  await page.close();
-};
-
 //Rotation function
 const rotation = async page => {
   if (rotationOn) {
     await page.keyboard.type("1");
     console.log("Pressed 1");
-  }
-};
-
-//Inventory Sort function
-const sortInv = async page => {
-  console.log("Sorting Inv...");
-  const items = [];
-  const bagSize = await page.evaluate(
-    container => container.childNodes.length,
-    await page.$(".slotcontainer")
-  );
-  for (let i = 0; i < bagSize; i++) {
-    const slot = await page.$(`#bag${i} > .icon`);
-    if (slot) {
-      /* console.log("Slot Exists"); */
-      await page
-        .hover(`#bag${i}`)
-        .then(async () => {
-          let item = {};
-          await page.waitForSelector(".slotdescription");
-          const itemName = await page.evaluate(
-            el => el.textContent,
-            await page.$(".slotdescription > div > .slottitle")
-          );
-          item.name = itemName;
-          /* console.log(itemName); */
-          const itemType = await page.evaluate(
-            el => el.textContent,
-            await page.$(".slotdescription > div > .type")
-          );
-          item.type = itemType
-          /* console.log(itemType); */
-          const itemRarity = determineRarity(
-            await page.evaluate(el => el.classList, await page.$(`#bag${i}`))
-          );
-          item.rarity = itemRarity
-          /* console.log(itemRarity); */
-          if (itemType.includes("rune")) {
-
-            item = {
-              ...item,
-              req: await getItemReq(),
-              price: await getItemPrice(),
-              desc: await getItemDesc(),
-              invPos: i
-            };
-          } else if (itemType.includes("book")) {
-            /* console.log("Its a book"); */
-
-            item = {
-              ...item,
-              req: await getItemReq(),
-              price: await getItemPrice(),
-              secondary: await getItemSecondary(),
-              invPos: i
-            };
-          } else if (itemType.includes("armor")) {
-            /* console.log("Its armor"); */
-
-            item = {
-              ...item,
-              grade: await getItemGrade(),
-              req: await getItemReq(),
-              price: await getItemPrice(),
-              desc: await getItemDesc(),
-              invPos: i
-            };
-          } else if (itemType.includes("quiver")) {
-            /* console.log("Its a quiver"); */
-
-            item = {
-              ...item,
-              grade: await getItemGrade(),
-              req: await getItemReq(),
-              price: await getItemPrice(),
-              desc: await getItemDesc(),
-              invPos: i
-            };
-          } else {
-            /* console.log("Its a misc"); */
-
-            item = {
-              ...item,
-              effect: await getItemEffect(),
-              req: await getItemReq(),
-              price: await getItemPrice(),
-              desc: await getItemDesc(),
-              invPos: i
-            };
-          }
-          items.push(item);
-          await page.waitFor(50);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    } /* else {
-      console.log("Slot does not exist");
-    } */
-  }
-  console.log(items);
-  items.sort((a, b) => {
-    if (a.rarity === b.rarity) {
-      let x = a.name.toLowerCase(),
-        y = b.name.toLowerCase();
-
-      return x < y ? -1 : x > y ? 1 : 0;
-    }
-    return b.rarity - a.rarity;
-  });
-  items.reverse();
-  items.forEach(async item => {
-    try {
-      await page.evaluate(
-        ({ item, items }) => {
-          const slotcontainer = document.querySelector(".slotcontainer");
-          prevElement = document.querySelector(`#bag${item.invPos}`);
-          slotcontainer.insertBefore(prevElement, slotcontainer.childNodes[0]);
-        },
-        { item, items }
-      );
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  await page.evaluate(({}) => {
-    document.querySelector(".slotcontainer").childNodes.forEach((child, i) => {
-      child.id = "bag" + i;
-    });
-  }, {});
-  console.log("Sorting Done!");
-};
-
-const getItemGrade = async() => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > .type")
-  );
-}
-
-const getItemEffect = async() => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > span")
-  );
-}
-
-const getItemReq = async () => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > .requirements")
-  );
-};
-
-const getItemPrice = async () => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > p > span > span")
-  );
-};
-
-const getItemDesc = async () => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > .description")
-  );
-};
-
-const getItemSecondary = async () => {
-  return await page.evaluate(
-    el => el.textContent,
-    await page.$(".slotdescription > div > .textsecondary")
-  );
-};
-
-const determineRarity = classes => {
-  for (let rarity in classes) {
-    /* console.log(classes[rarity]); */
-    if (classes[rarity] === "white") {
-      /* console.log("Common"); */
-      return 0;
-    } else if (classes[rarity] === "green") {
-      /* console.log("Uncommon"); */
-      return 1;
-    } else if (classes[rarity] === "blue") {
-      /* console.log("Rare"); */
-      return 2;
-    } else if (classes[rarity] === "purple") {
-      /* console.log("Epic"); */
-      return 3;
-    }
   }
 };
 
@@ -499,3 +299,24 @@ const saveCookies = async () => {
       new Date(settings["Cookies"][2].expires * 1000)
   );
 };
+
+const getBarInfo = async () => {
+  const skillBar = [];
+  await page.evaluate(({skills, skillBar}) => {
+    console.log(skills);
+    document.querySelector("#skillbar").childNodes.forEach(async (child, i) => {
+      const icon = document.querySelector(`#sk${i} > img`);
+      if(icon) {
+        console.log('Slot is filled');
+        const skillId = icon.getAttribute('src').slice(18).split('.')[0];
+        console.log(skillId);
+        const skill = skills.find(skill => skill.ID === Number(skillId));
+        console.log(skill);
+        skillBar.push(skill);
+      }
+    });
+    console.log(skillBar);
+  }, {skills, skillBar});
+  console.log(skillBar);
+  return skillBar
+}

@@ -1,0 +1,275 @@
+[
+    {
+        "Name": "Precise Shot",
+        "Cast Time": 1.7,
+        "Cooldown": 6,
+        "ID": 9,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Bloodline",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 8,
+        "Classes": "Archer, Warrior, Mage, Shaman"
+    },
+    {
+        "Name": "Auto attack",
+        "Cast Time": 0,
+        "Cooldown": 5,
+        "ID": 5,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Dash",
+        "Cast Time": 0,
+        "Cooldown": 10,
+        "ID": 38,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Swift Shot",
+        "Cast Time": 1.4,
+        "Cooldown": 0,
+        "ID": 31,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Poison Arrows",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 29,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Pathfinding",
+        "Cast Time": 0,
+        "Cooldown": 100,
+        "ID": 27,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Cranial Punctures",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 26,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Temporal Dilation",
+        "Cast Time": 0,
+        "Cooldown": 120,
+        "ID": 9,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Invigorate",
+        "Cast Time": 0,
+        "Cooldown": 50,
+        "ID": 11,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Serpent Arrows",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 10,
+        "Classes": "Archer"
+    },
+    {
+        "Name": "Taunt",
+        "Cast Time": 0,
+        "Cooldown": 15,
+        "ID": 34,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Charge",
+        "Cast Time": 0,
+        "Cooldown": 15,
+        "ID": 33,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Crescent Swipe",
+        "Cast Time": 0,
+        "Cooldown": 6,
+        "ID": 3,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Armor Reinforcement",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 21,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Crusader's Courage",
+        "Cast Time": 0,
+        "Cooldown": 150,
+        "ID": 20,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Bulwark",
+        "Cast Time": 0,
+        "Cooldown": 35,
+        "ID": 2,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Unholy Warcry",
+        "Cast Time": 0,
+        "Cooldown": 150,
+        "ID": 19,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Centrifugal Laceration",
+        "Cast Time": 0,
+        "Cooldown": 0,
+        "ID": 18,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Colossal Reconstruction",
+        "Cast Time": 0,
+        "Cooldown": 25,
+        "ID": 17,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Slash",
+        "Cast Time": 0,
+        "Cooldown": 1,
+        "ID": 1,
+        "Classes": "Warrior"
+    },
+    {
+        "Name": "Auto attack",
+        "Cast Time": 0,
+        "Cooldown": 3.2,
+        "ID": 0,
+        "Classes": "Warrior,Shaman"
+    },
+    {
+        "Name": "Chilling Radiance",
+        "Cast Time": 0,
+        "Cooldown": 20,
+        "ID": 14,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Icicle Orb",
+        "Cast Time": 1.5,
+        "Cooldown": 15,
+        "ID": 15,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Hypothermic Frenzy",
+        "Cast Time": 0,
+        "Cooldown": 45,
+        "ID": 16,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Arctic Aura",
+        "Cast Time": 0,
+        "Cooldown": 120,
+        "ID": 22,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Ice Shield",
+        "Cast Time": 0,
+        "Cooldown": 60,
+        "ID": 23,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Enchantment",
+        "Cast Time": 1.2,
+        "Cooldown": 0,
+        "ID": 24,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Teleport",
+        "Cast Time": 0,
+        "Cooldown": 12,
+        "ID": 32,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Ice bolt",
+        "Cast Time": 1.5,
+        "Cooldown": 1,
+        "ID": 0,
+        "Classes": "Mage"
+    },
+    {
+        "Name": "Decay",
+        "Cast Time": 1,
+        "Cooldown": 1,
+        "ID": 12,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Mimir's Well",
+        "Cast Time": 0,
+        "Cooldown": 120,
+        "ID": 13,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Canine Howl",
+        "Cast Time": 0,
+        "Cooldown": 60,
+        "ID": 28,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Healing Totem",
+        "Cast Time": 2.3,
+        "Cooldown": 60,
+        "ID": 30,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Summon",
+        "Cast Time": 4,
+        "Cooldown": 120,
+        "ID": 35,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Spirit Animal",
+        "Cast Time": 0,
+        "Cooldown": 30,
+        "ID": 36,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Agonize",
+        "Cast Time": 2.3,
+        "Cooldown": 40,
+        "ID": 37,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Mend",
+        "Cast Time": 0,
+        "Cooldown": 8,
+        "ID": 6,
+        "Classes": "Shaman"
+    },
+    {
+        "Name": "Revitalize",
+        "Cast Time": 1.8,
+        "Cooldown": 0,
+        "ID": 7,
+        "Classes": "Shaman"
+    }
+]

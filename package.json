@@ -2,9 +2,9 @@
   "name": "hordes.io",
   "version": "1.0.0",
   "description": "A simple tool for modifying the game hordes.io",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon './index.js'"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
     "fs": "0.0.1-security",
     "iohook": "^0.6.2",
     "node-fetch": "^2.6.0",
+    "nodemon": "^2.0.2",
     "prompt": "^1.0.0",
     "puppeteer": "^2.0.0",
     "request": "^2.88.0"
