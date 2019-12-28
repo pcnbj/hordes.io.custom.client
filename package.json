@@ -17,7 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "fs": "0.0.1-security",
-    "iohook": "^0.6.2",
+    "iohook": "^0.1.16",
+    "node": "^8.17.0",
     "node-fetch": "^2.6.0",
     "nodemon": "^2.0.2",
     "prompt": "^1.0.0",

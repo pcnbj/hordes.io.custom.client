@@ -38,7 +38,7 @@ const sortInv = async page => {
                 secondary: await getItemSecondary(page),
                 invPos: i
               };
-            } else if (item.type.includes("armor")) {
+            } else if (item.type.includes("armor") || item.type.includes("glove")) {
               /* console.log("Its armor"); */
   
               item = {

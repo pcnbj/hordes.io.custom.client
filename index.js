@@ -5,6 +5,11 @@ const prompt = require("prompt");
 const ownFuncs = require("./ownFunctions");
 var fs = require("fs");
 
+//Todo
+//Make shift click item functionalitty on all items.
+//Make inventory sorting faster
+//Make skill cd show in seconds and miliseconds.
+
 ("use strict");
 
 let browser;
@@ -41,15 +46,15 @@ const skills = JSON.parse(fs.readFileSync("skills.json"));
 
 //Map keynames to keycodes NOTE: Add more keys
 const keycodes = {
-  Numpad1: 3663,
-  Numpad2: 57424,
-  Numpad3: 3665,
-  Numpad4: 57419,
-  Numpad5: 57420,
-  Numpad6: 57421,
-  Numpad7: 3665,
-  Numpad8: 57416,
-  Numpad9: 3657
+  Numpad1: 61007,
+  Numpad2: 61008,
+  Numpad3: 61009,
+  Numpad4: 61003,
+  Numpad5: 61004,
+  Numpad6: 61005,
+  Numpad7: 60999,
+  Numpad8: 61000,
+  Numpad9: 61001
 };
 
 //Set Auto Rotation shortcut
@@ -118,7 +123,7 @@ const clientRun = async () => {
     //Launch Puppeteer
     browser = await puppeteer.launch({
       headless: false,
-      args: [`--start-maximized`, "--app=https://hordes.io/"],
+      args: [`--start-maximized`, "--app=https://hordes.io/", '--no-sandbox'],
       defaultViewport: null
     });
     //Set game settings
@@ -230,6 +235,8 @@ const clientRun = async () => {
     await page.waitForSelector(".actionbarcontainer");
     //Inject new styles
     await page.addStyleTag({ path: "style.css" });
+    //Inject client functions
+    await page.addScriptTag({ path: "clientInject.js" });
     //Inform player that the game has loaded
     console.log("Actionbar Found");
 
@@ -251,6 +258,7 @@ const clientRun = async () => {
           console.log(event.target);
           if(event.shiftKey) {
             console.log('Shift Cliked An Auction Element');
+            searchItem(event.target);
           }
         }
       })
